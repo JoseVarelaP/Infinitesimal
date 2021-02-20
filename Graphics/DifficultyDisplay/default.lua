@@ -90,7 +90,7 @@ local DiffDisplay = Def.ActorFrame{
 				-- local al = math.mod( ind, 14 )
 				-- indexstart = ind > 14 and (math.mod( ind, 14 )*2)+math.mod( ind, 14 ) or 0
 				indexstart = ind > 14 and ( math.mod( ind, 14*14 )-math.mod( ind, 14 ) ) or 0
-				SCREENMAN:SystemMessage( ("%i: %i - %i"):format( GetCurrentStepsIndex(pn), indexstart, indexstart+13 ) )
+				-- SCREENMAN:SystemMessage( ("%i: %i - %i"):format( GetCurrentStepsIndex(pn), indexstart, indexstart+13 ) )
 			end
 			for i=1,14 do
 				if stepsArray[ indexstart+i ] then
