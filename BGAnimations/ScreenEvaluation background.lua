@@ -15,18 +15,9 @@ local t = Def.ActorFrame {
 	end
 }
 
-local song = GAMESTATE:GetCurrentSong();
+local song = GAMESTATE:GetCurrentSong()
 
 t[#t+1] = Def.ActorFrame {
-    Def.Sprite{
-        Texture=THEME:GetPathG("","EvalElements/EvalBGGradient"),
-        InitCommand=function(self)
-            self:Center()
-            local song = GAMESTATE:GetCurrentSong()
-            local bg = song:GetBackgroundPath()
-        end
-    },
-
     Def.Sprite {
         InitCommand=function(self)
             self:Center()
