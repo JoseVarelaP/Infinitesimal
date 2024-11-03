@@ -220,7 +220,7 @@ local function SortCharts(a, b)
     end
 end
 
-local function ChartRange(chart, a, b)
+function ChartRange(chart, a, b)
     if chart:GetMeter() >= a and chart:GetMeter() <= b then
         return true
     end
@@ -249,12 +249,9 @@ function AssembleBasicMode()
     for i, song in pairs(SONGMAN:GetAllSongs()) do
         local steps = song:GetStepsByStepsType('StepsType_Pump_Single')
         table.sort(steps, SortCharts)
-        local doublesSteps = song:GetStepsByStepsType('StepsType_Pump_Double')
-        table.sort(doublesSteps, SortCharts)
-        if #steps >= 3 and #doublesSteps >= 1 then --Somehow doublesSteps can be non nil despite having no doubles steps.
+        if #steps >= 3 then
             if (ChartRange(steps[1], 1, 2) and ChartRange(steps[2], 3, 4) and ChartRange(steps[3], 5, 7) or
-                (ChartRange(steps[1], 3, 4) and ChartRange(steps[2], 5, 7) and ChartRange(steps[3], 8, 9)))
-                and ChartRange(doublesSteps[1], 1, 9) then
+                (ChartRange(steps[1], 3, 4) and ChartRange(steps[2], 5, 7) and ChartRange(steps[3], 8, 9))) then
                 local shortSongDir = string.match(song:GetSongDir(),isolatePattern)
                 local groupName = song:GetGroupName()
                 local groupTbl = GetOrCreateChild(set, groupName)

@@ -100,10 +100,13 @@ local t = Def.ActorFrame {
             table.sort(DoubleCharts, SortCharts)
             
             -- Exclude double from two players
-            if GAMESTATE:GetNumSidesJoined() > 1 then
+            if GAMESTATE:GetNumSidesJoined() > 1 or #DoubleCharts < 1 then
                 ChartArray = { SingleCharts[1], SingleCharts[2], SingleCharts[3] }
-            else
+			-- Better filter a potential Double chart available, function is located in Scripts/04 Main.lua
+            elseif ChartRange(DoubleCharts[1], 1, 9) then
                 ChartArray = { SingleCharts[1], SingleCharts[2], SingleCharts[3], DoubleCharts[1] }
+            else
+                ChartArray = { SingleCharts[1], SingleCharts[2], SingleCharts[3] }
             end
         end
 
@@ -154,6 +157,7 @@ local t = Def.ActorFrame {
                     self:GetChild("")[i]:GetChild("Icon"):visible(false)
                     self:GetChild("")[i]:GetChild("IconTrim"):visible(false)
                     self:GetChild("")[i]:GetChild("Level"):visible(false)
+					self:GetChild("")[i]:GetChild("Difficulty"):visible(false)
                     self:GetChild("")[i]:GetChild("HighlightP1"):visible(false)
                     self:GetChild("")[i]:GetChild("HighlightP2"):visible(false)
                 end
@@ -163,6 +167,7 @@ local t = Def.ActorFrame {
                 self:GetChild("")[i]:GetChild("Icon"):visible(false)
                 self:GetChild("")[i]:GetChild("IconTrim"):visible(false)
                 self:GetChild("")[i]:GetChild("Level"):visible(false)
+				self:GetChild("")[i]:GetChild("Difficulty"):visible(false)
                 self:GetChild("")[i]:GetChild("HighlightP1"):visible(false)
                 self:GetChild("")[i]:GetChild("HighlightP2"):visible(false)
             end
