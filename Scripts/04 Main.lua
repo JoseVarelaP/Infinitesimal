@@ -1,5 +1,3 @@
-LastGroupMainIndex = 0
-LastGroupSubIndex = 0
 LastSongIndex = 0
 
 function OptionNameString(str)
@@ -9,7 +7,9 @@ end
 -- Unfortunately, some settings persist with the machine profile even after a credit,
 -- so we will reset all custom mods we have to avoid any weird situations
 function ResetLuaMods(pn)
-    LastSongIndex = 0
+	LastGroupMainIndex = 0
+	LastGroupSubIndex = 0
+	LastSongIndex = 0
     local CarryJudgment = LoadModule("Config.Load.lua")("CarryJudgment", "Save/OutFoxPrefs.ini")
     local ProfileDir = "Save/MachineProfile/OutFoxPrefsForPlayerp" .. string.sub(pn,-1) .. "/OutFoxPrefs.ini"
     LoadModule("Config.Save.lua")("AutoVelocity", tostring(200), ProfileDir)
@@ -23,6 +23,9 @@ function ResetLuaMods(pn)
     LoadModule("Config.Save.lua")("ScoreDisplay", tostring(false), ProfileDir)
     LoadModule("Config.Save.lua")("SongProgress", tostring(false), ProfileDir)
     LoadModule("Config.Save.lua")("ProLifebar", tostring(false), ProfileDir)
+	LoadModule("Config.Save.lua")("GroupMainIndex", 0, ProfileDir)
+	LoadModule("Config.Save.lua")("GroupSubIndex", 0, ProfileDir)
+	LoadModule("Config.Save.lua")("SongIndex", 0, ProfileDir)
     if IsArcade() or (CarryJudgment == false) then
         LoadModule("Config.Save.lua")("SmartTimings",tostring("Pump Normal"),"Save/OutFoxPrefs.ini")
     end
