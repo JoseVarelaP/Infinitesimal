@@ -127,7 +127,7 @@ return function(Player)
                 end
                 
                 local ComboScore = 0
-                local NoteScore = TNSPoints[TapNoteScore]
+                local NoteScore = TNSPoints[TapNoteScore] or 0
                 
                 if TapNoteScore <= TNSGreat then
                     -- Add bonus above 50 combo
