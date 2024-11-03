@@ -112,6 +112,7 @@ local function InputHandler(event)
     end
     
     local button = event.GameButton
+	-- SCREENMAN:SystemMessage(button)
     
     -- To avoid control from a player that has not joined, filter the inputs out
     if pn == PLAYER_1 and not GAMESTATE:IsPlayerEnabled(PLAYER_1) then return end
@@ -181,7 +182,7 @@ local function InputHandler(event)
                 end
             end
             
-        elseif button == "UpRight" or button == "UpLeft" or button == "Up" or button == "MenuUp" then
+        elseif button == "UpRight" or button == "UpLeft" or button == "Up" or button == "MenuUp" or button == "MenuDown" then
             if not IsFocusedMain then 
                 IsFocusedMain = true
                 MESSAGEMAN:Broadcast("RefreshHighlight")
