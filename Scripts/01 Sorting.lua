@@ -1,4 +1,4 @@
--- Our main table which will contain all sorted groups.
+	-- Our main table which will contain all sorted groups.
 MasterGroupsList = {}
 GroupsList = {}
 
@@ -113,7 +113,7 @@ function AssembleGroupSorting()
         end
     end
     
-    if #Shortcuts ~= nil then
+    if #Shortcuts >= 1 then
         MasterGroupsList[#MasterGroupsList].SubGroups[#MasterGroupsList[#MasterGroupsList].SubGroups + 1] = {
             Name = "Shortcut",
             Banner = THEME:GetPathG("", "Common fallback banner"), -- something appending v at the end
@@ -133,7 +133,7 @@ function AssembleGroupSorting()
         end
     end
     
-    if #Remixes ~= nil then
+    if #Remixes >= 1 then
         MasterGroupsList[#MasterGroupsList].SubGroups[#MasterGroupsList[#MasterGroupsList].SubGroups + 1] = {
             Name = "Remix",
             Banner = THEME:GetPathG("", "Common fallback banner"), -- something appending v at the end
@@ -149,7 +149,7 @@ function AssembleGroupSorting()
     local FullSongs = {}
     for j, Song in ipairs(AllSongs) do
         local StepList = Song:GetAllSteps()
-        if #StepList ~= 0 then
+        if #StepList >= 1 then
             local FirstStep = StepList[1]
             local Duration = FirstStep:GetChartLength()
             if string.find(string.upper(Song:GetSongDir()), "[FULL SONG]", nil, true) then
@@ -160,7 +160,7 @@ function AssembleGroupSorting()
         end
     end
     
-    if #FullSongs ~= nil then
+    if #FullSongs >= 1 then
         MasterGroupsList[#MasterGroupsList].SubGroups[#MasterGroupsList[#MasterGroupsList].SubGroups + 1] = {
             Name = "Full Song",
             Banner = THEME:GetPathG("", "Common fallback banner"), -- something appending v at the end
@@ -199,7 +199,7 @@ function AssembleGroupSorting()
 		end
     end
     
-    if #CoopSongs ~= nil then
+    if #CoopSongs >= 1 then
         MasterGroupsList[#MasterGroupsList].SubGroups[#MasterGroupsList[#MasterGroupsList].SubGroups + 1] = {
             Name = "Co-op",
             Banner = THEME:GetPathG("", "Common fallback banner"), -- something appending v at the end
@@ -224,7 +224,7 @@ function AssembleGroupSorting()
 	for GroupName in ivalues(SONGMAN:GetSongGroupNames()) do
 		for Song in ivalues(SONGMAN:GetSongsInGroup(GroupName)) do
 			local Steps = Song:GetAllSteps()
-			if #Steps > 0 then
+			if #Steps >= 1 then
 				SongGroups[#SongGroups + 1] = GroupName
 				break
 			end
