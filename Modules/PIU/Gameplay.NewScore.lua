@@ -66,7 +66,7 @@ return function(Player)
             -- Make sure the player isn't AutoPlay
             if State:GetPlayerController() ~= "PlayerController_Autoplay" then                
                 -- Count the combo from Lua due to some issues, don't ask me
-                if TapNote and TapNote:GetTapNoteType() ~= "TapNoteType_HoldTail" then
+                if (TapNote and TapNote:GetTapNoteType() ~= "TapNoteType_HoldTail") or TapNoteScore == "TapNoteScore_" then
                     CurrentCombo = CurrentCombo
                 else
                     if (TapNoteScore <= TNSGreat and TapNoteScore >= "TapNoteScore_W1") or TapNoteScore == "TapNoteScore_CheckpointHit" then
@@ -102,7 +102,7 @@ return function(Player)
                 MESSAGEMAN:Broadcast("UpdateScore", {Player = Player, Score = PlayerScore})
                 
                 -- Used for debugging
-                -- SCREENMAN:SystemMessage(PlayerScore .. " - " .. NoteScore - ComboScore .. " - " .. ComboScore .. " - " .. CurrentCombo .. " - " .. LevelConstant .. " - " .. GradeBonus)
+                -- SCREENMAN:SystemMessage(PlayerScore .. " - " .. TapNoteScore .. " - " .. CurrentCombo)
             end
         end
     }
