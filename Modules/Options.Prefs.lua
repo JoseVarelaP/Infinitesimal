@@ -123,6 +123,12 @@ return {
         Choices = { OptionNameString('Off'), OptionNameString('On') },
         Values = {false, true}
     },
+    BasicSongsPerPlay =
+    {
+        Default = '3',
+        Choices = { '1', '2', '3', '4', '5' },
+        Values = {1, 2, 3, 4, 5}
+    },
     CenterChartList =
     {
         Default = true,
