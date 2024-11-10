@@ -187,20 +187,16 @@ local function InputHandler(event)
                 IsFocusedMain = true
                 MESSAGEMAN:Broadcast("RefreshHighlight")
             elseif IsHome or IsEvent then 
-                MESSAGEMAN:Broadcast("ExitPressed")
-            end
-        end
-
-        if IsHome or IsEvent then
-            if event.type == "InputEventType_Repeat" then
-                if button == "UpLeft" or button == "UpRight" or button == "Up" then
-                    TickCount = TickCount + 1
+				if event.type == "InputEventType_Repeat" then
+					TickCount = TickCount + 1
                     MESSAGEMAN:Broadcast("ExitTickUp")
                     if TickCount == 15 then
                         BlockScreenInput(false)
                         SCREENMAN:GetTopScreen():Cancel()
                     end
-                end
+				else
+					MESSAGEMAN:Broadcast("ExitPressed")
+				end
             end
         end
     end
@@ -308,6 +304,8 @@ for i = 1, MainWheelSize do
             elseif tween then
                 self:easeoutexpo(0.4)
             end
+			
+			self:GetChild("Text"):playcommand("Refresh")
 
             -- Animate!
             self:xy(xpos + displace, SCREEN_CENTER_Y - 60)
@@ -339,7 +337,7 @@ for i = 1, MainWheelSize do
             RefreshHighlightMessageCommand=function(self) self:playcommand("Refresh") end,
             
             RefreshCommand=function(self)
-                self:finishtweening():easeoutexpo(0.4):diffusealpha((IsFocusedMain or i == MainWheelCenter) and 1 or 0.5)
+                self:finishtweening():easeoutexpo(0.4):diffusealpha(i == MainWheelCenter and 1 or 0.5)
             end,
         }
     }
