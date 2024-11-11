@@ -33,44 +33,44 @@ local function InputHandler(event)
     local button = event.button
     
     -- If an unjoined player attempts to join and has enough credits, join them
-    if (button == "Center" or (not IsGame("pump") and button == "Start")) and 
+    if (button == "Start" or button == "MenuStart" or button == "Center") and 
         not GAMESTATE:IsSideJoined(pn) and GAMESTATE:GetCoins() >= GAMESTATE:GetCoinsNeededToJoin() then
         GAMESTATE:JoinPlayer(pn)
         -- The command above does not deduct credits so we'll do it ourselves
         GAMESTATE:InsertCoin(-(GAMESTATE:GetCoinsNeededToJoin()))
         MESSAGEMAN:Broadcast("PlayerJoined", { Player = pn })
-    end
+    else
+		-- To avoid control from a player that has not joined, filter the inputs out
+		if pn == PLAYER_1 and not GAMESTATE:IsPlayerEnabled(PLAYER_1) then return end
+		if pn == PLAYER_2 and not GAMESTATE:IsPlayerEnabled(PLAYER_2) then return end
 
-    -- To avoid control from a player that has not joined, filter the inputs out
-    if pn == PLAYER_1 and not GAMESTATE:IsPlayerEnabled(PLAYER_1) then return end
-    if pn == PLAYER_2 and not GAMESTATE:IsPlayerEnabled(PLAYER_2) then return end
+		if not SongIsChosen then
+			if button == "Left" or button == "MenuLeft" or button == "DownLeft" then
+				CurrentIndex = CurrentIndex - 1
+				if CurrentIndex < 1 then CurrentIndex = #Songs end
+				
+				GAMESTATE:SetCurrentSong(Songs[CurrentIndex])
+				UpdateItemTargets(CurrentIndex)
+				MESSAGEMAN:Broadcast("Scroll", { Direction = -1 })
 
-    if not SongIsChosen then
-        if button == "Left" or button == "MenuLeft" or button == "DownLeft" then
-            CurrentIndex = CurrentIndex - 1
-            if CurrentIndex < 1 then CurrentIndex = #Songs end
-            
-            GAMESTATE:SetCurrentSong(Songs[CurrentIndex])
-            UpdateItemTargets(CurrentIndex)
-            MESSAGEMAN:Broadcast("Scroll", { Direction = -1 })
+			elseif button == "Right" or button == "MenuRight" or button == "DownRight" then
+				CurrentIndex = CurrentIndex + 1
+				if CurrentIndex > #Songs then CurrentIndex = 1 end
+				
+				GAMESTATE:SetCurrentSong(Songs[CurrentIndex])
+				UpdateItemTargets(CurrentIndex)
+				MESSAGEMAN:Broadcast("Scroll", { Direction = 1 })
 
-        elseif button == "Right" or button == "MenuRight" or button == "DownRight" then
-            CurrentIndex = CurrentIndex + 1
-            if CurrentIndex > #Songs then CurrentIndex = 1 end
-            
-            GAMESTATE:SetCurrentSong(Songs[CurrentIndex])
-            UpdateItemTargets(CurrentIndex)
-            MESSAGEMAN:Broadcast("Scroll", { Direction = 1 })
+			elseif button == "Start" or button == "MenuStart" or button == "Center" then
+				MESSAGEMAN:Broadcast("MusicWheelStart")
 
-        elseif button == "Start" or button == "MenuStart" or button == "Center" then
-            MESSAGEMAN:Broadcast("MusicWheelStart")
+			elseif button == "Back" then
+				SCREENMAN:GetTopScreen():Cancel()
+			end
+		end
 
-        elseif button == "Back" then
-            SCREENMAN:GetTopScreen():Cancel()
-        end
-    end
-
-	MESSAGEMAN:Broadcast("UpdateMusic")
+		MESSAGEMAN:Broadcast("UpdateMusic")
+	end
 end
 
 -- Update Songs item targets
@@ -101,6 +101,10 @@ local t = Def.ActorFrame {
 
         self:easeoutexpo(1):y(SCREEN_HEIGHT / 2 - 150)
     end,
+	
+	OffCommand=function(self)
+		self:easeoutexpo(1):y(SCREEN_HEIGHT / 2 + 155)
+	end,
 
     CodeCommand=function(self, params)
         if params.Name == "FullMode" then
