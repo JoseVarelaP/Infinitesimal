@@ -108,6 +108,27 @@ local t = Def.ActorFrame {
             AltText="OutFox",
             InitCommand=function(self) self:y(20) end
         }
+    },
+
+    Def.ActorFrame{
+        Condition=NETMAN and NETMAN:IsConnectionEstablished(),
+        OffCommand=function(self) self:stoptweening():easeoutexpo(0.25):zoom(0):diffusealpha(0) end,
+
+        Def.Quad{
+            InitCommand=function (self)
+                self:align(0,0):zoomto(250, 40)
+                :diffuse(Color.Black):faderight(0.5)
+            end
+        },
+
+        Def.BitmapText{
+            Font="Common Normal",
+            Text=THEME:GetString("ScreenTitleMenu","ConnectedToOFOnline"),
+            InitCommand=function (self)
+                self:xy(10,10):align(0,0):diffuse(ColorLightTone(Color.Green))
+                :shadowcolor(ColorDarkTone(Color.Green)):shadowlength(2)
+            end
+        }
     }
 }
 
