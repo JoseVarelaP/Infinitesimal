@@ -1,6 +1,17 @@
 local CardItemW = 268
 local CardItemH = 64
 
+local getSavedIndex = function( pn )
+	local pref = PREFSMAN:GetPreference("DefaultLocalProfileID".. ToEnumShortString(pn))
+	for i = 0,PROFILEMAN:GetNumLocalProfiles()-1 do
+		local profile = PROFILEMAN:GetLocalProfileIDFromIndex(i)
+		if profile == pref then
+			return i+1 -- +1 since we're using guest profiles.
+		end
+	end
+	return 1
+end
+
 function GetLocalProfiles()
     local t = {}
 
@@ -91,19 +102,25 @@ function LoadPlayerStuff(Player)
     t[#t+1] = Def.ActorFrame {
         Name = "JoinFrame",
         LoadCard(Color("Black")),
+        OnCommand=function (self)
+            SCREENMAN:GetTopScreen():SetProfileIndex(Player, getSavedIndex(Player))
+        end,
 
         LoadActor(THEME:GetPathG("", "PressCenterStep"))..{
             InitCommand=function(self) self:queuecommand("Refresh") end,
             StorageDevicesChangedMessageCommand=function(self)self:queuecommand("Refresh")end,
             RefreshCommand=function(self)
     			CardState = MEMCARDMAN:GetCardState(Player)
-    			if CardState == "MemoryCardState_none" then
-    				self:GetChild("Press"):Load(THEME:GetPathG("", "PressCenterStep/Press"))
-    			elseif CardState == "MemoryCardState_ready" then
-    				self:GetChild("Press"):Load(THEME:GetPathG("", "PressCenterStep/USB"))
-    			elseif CardState == "MemoryCardState_error" then
-    				self:GetChild("Press"):Load(THEME:GetPathG("", "PressCenterStep/Error"))
-    			end
+
+    			if self.GetChild then
+                    if CardState == "MemoryCardState_none" then
+                        self:GetChild("Press"):Load(THEME:GetPathG("", "PressCenterStep/Press"))
+                    elseif CardState == "MemoryCardState_ready" then
+                        self:GetChild("Press"):Load(THEME:GetPathG("", "PressCenterStep/USB"))
+                    elseif CardState == "MemoryCardState_error" then
+                        self:GetChild("Press"):Load(THEME:GetPathG("", "PressCenterStep/Error"))
+                    end
+                end
     		end
         }
     }
