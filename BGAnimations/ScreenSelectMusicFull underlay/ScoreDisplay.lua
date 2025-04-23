@@ -4,10 +4,41 @@ local SongIsChosen = false
 
 local t = Def.ActorFrame {}
 
+local function CreateFakePSSObject(onlineScoreData)
+    local pss = setmetatable({
+        GetGrade = function(this)
+            return "Grade_Tier05"
+        end,
+        GetScore = function(this)
+            if Scoring == "New" then
+                return math.ceil(onlineScoreData.score * 1000001)
+            end
+
+            return onlineScoreData.score
+        end,
+        GetTapNoteScore = function(this, tns)
+            local count = onlineScoreData.tapnote_data[tns] or 0
+            return count
+        end,
+        GetMaxCombo = function(this)
+            -- Online data doesn't track the max combo value, so we'll just improvise-
+            return 10
+        end
+    },{})
+
+    return pss
+end
+
+-- Let's keep a buffer of the online data we have received.
+-- Format for this will be:
+-- [ChartKey] = {data}
+local chartKeyOnlineInfo = {}
+
 for pn in ivalues(GAMESTATE:GetHumanPlayers()) do
     -- Player 2's panel is slightly adjusted, so we need to correct
     -- the positioning of actors so that they fit in properly
     local CorrectionX = pn == PLAYER_2 and -15 or 0
+    local isOnlineViewNow = false
     
     t[#t+1] = Def.ActorFrame {
         Def.ActorFrame {
@@ -15,6 +46,8 @@ for pn in ivalues(GAMESTATE:GetHumanPlayers()) do
             
             SongChosenMessageCommand=function(self)
                 SongIsChosen = true
+                -- Clean the chartkey table.
+                chartKeyOnlineInfo = {}
                 self:stoptweening():easeoutexpo(0.5)
                 :x(358 * (pn == PLAYER_2 and 1 or -1))
                 self:playcommand("Refresh")
@@ -55,13 +88,57 @@ for pn in ivalues(GAMESTATE:GetHumanPlayers()) do
                     local MachineDP = round(MachineHighScores[1]:GetPercentDP() * 100, 2) .. "%"
                     local MachineName = MachineHighScores[1]:GetName()
 
-                    self:GetChild("MachineGrade"):Load(THEME:GetPathG("", "LetterGrades/" .. (ClassicGrades and "" or "New/") ..
+                    self:GetChild("MachineScore"):GetChild("Grade"):Load(THEME:GetPathG("", "LetterGrades/" .. (ClassicGrades and "" or "New/") ..
                             LoadModule("PIU/Score.Grading.lua")(MachineHighScores[1]))):visible(true)
-                    self:GetChild("MachineScore"):settext(MachineName .. "\n" .. MachineDP .. "\n" .. MachineScore)
+                    self:GetChild("MachineScore"):GetChild("Score"):settext(MachineName .. "\n" .. MachineDP .. "\n" .. MachineScore)
                 else
-                    self:GetChild("MachineGrade"):visible(false)
-                    self:GetChild("MachineScore"):settext("")
+                    self:GetChild("MachineScore"):GetChild("Grade"):visible(false)
+                    self:GetChild("MachineScore"):GetChild("Score"):settext("")
                 end
+
+                if not NETMAN and NETMAN:IsConnectionEstablished() then return end
+
+                self:playcommand("Tween")
+                -- If we already have the online data cached, then just use that.
+                local chartkey = GAMESTATE:GetCurrentSteps(pn):GetChartKey()
+                if chartKeyOnlineInfo[chartkey] then
+                    self:playcommand("UpdateOnlineInfo",{data = chartKeyOnlineInfo[chartkey]})
+                    return
+                end
+
+                -- Let's fetch the best score, and put it on a special handle where the Machine Best area is.
+                NETMAN:FuncHighScoresForChart{
+                    ChartKey = chartkey,
+                    Timing = "Original",
+                    Rate = GAMESTATE:GetSongOptionsObject("ModsLevel_Preferred"):MusicRate(),
+                    PlayerNumber = pn,
+                    OnResponse = function (data)
+                        if not data.response.scores or #data.response.scores == 0 then
+                            self:GetChild("OnlineScore"):GetChild("Grade"):visible(false)
+                            self:GetChild("OnlineScore"):GetChild("Score"):settext("")
+                            return
+                        end
+
+                        chartKeyOnlineInfo[GAMESTATE:GetCurrentSteps(pn):GetChartKey()] = onlinescore
+
+                        self:playcommand("UpdateOnlineInfo",{data = data.response.scores[1]})
+                    end,
+                    OnFail = function () end
+                }
+
+            end,
+
+            UpdateOnlineInfoCommand=function(self,params)
+                local onlineScore = params.data
+                local score = CreateFakePSSObject(onlineScore)
+
+                self:GetChild("OnlineScore"):GetChild("Grade"):Load(THEME:GetPathG("", "LetterGrades/" .. (ClassicGrades and "" or "New/") ..
+                    LoadModule("PIU/Score.Grading.lua")(score))):visible(true)
+
+                local scoreName = onlineScore.username
+                local dp = round(onlineScore.score * 100, 2) .. "%"
+                local scr = round(score:GetScore()*1000000, 2)
+                self:GetChild("OnlineScore"):GetChild("Score"):settext(scoreName .. "\n" .. dp .. "\n" .. scr)
             end,
 
             Def.Sprite {
@@ -88,21 +165,53 @@ for pn in ivalues(GAMESTATE:GetHumanPlayers()) do
                 end,
             },
             
-            Def.Sprite {
-                Name="MachineGrade",
-                InitCommand=function(self)
-                    self:xy(-40 + CorrectionX, 60):zoom(0.2)
+            Def.ActorFrame{
+                Name="MachineScore",
+                TweenCommand=function(self)    
+                    isOnlineViewNow = not isOnlineViewNow
+                    self:stoptweening():linear(0.2):diffusealpha( isOnlineViewNow and 0 or 1 )
+                    :sleep(1):queuecommand("Tween")
                 end,
+                Def.Sprite {
+                    Name="Grade",
+                    InitCommand=function(self)
+                        self:xy(-40 + CorrectionX, 60):zoom(0.2)
+                    end,
+                },
+
+                Def.BitmapText {
+                    Name="Score",
+                    Font="Common normal",
+                    InitCommand=function(self)
+                        self:xy(90 + CorrectionX, 60):zoom(1):halign(1)
+                        :diffuse(Color.White):vertspacing(-6):shadowlength(1)
+                    end,
+                },
             },
 
-            Def.BitmapText {
-                Name="MachineScore",
-                Font="Common normal",
-                InitCommand=function(self)
-                    self:xy(90 + CorrectionX, 60):zoom(1):halign(1)
-                    :diffuse(Color.White):vertspacing(-6):shadowlength(1)
+            Def.ActorFrame{
+                Name="OnlineScore",
+                Condition=NETMAN and NETMAN:IsConnectionEstablished(),
+                TweenCommand=function(self)
+                    self:stoptweening():linear(0.2):diffusealpha( isOnlineViewNow and 1 or 0 )
+                    :sleep(1):queuecommand("Tween")
                 end,
-            },
+                Def.Sprite {
+                    Name="Grade",
+                    InitCommand=function(self)
+                        self:xy(-40 + CorrectionX, 60):zoom(0.2)
+                    end,
+                },
+
+                Def.BitmapText {
+                    Name="Score",
+                    Font="Common normal",
+                    InitCommand=function(self)
+                        self:xy(90 + CorrectionX, 60):zoom(1):halign(1)
+                        :diffuse(Color.White):vertspacing(-6):shadowlength(1)
+                    end,
+                },
+            }
         }
     }
 end

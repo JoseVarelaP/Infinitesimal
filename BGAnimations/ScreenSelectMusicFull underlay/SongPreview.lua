@@ -100,9 +100,11 @@ local t = Def.ActorFrame {
         end,
 
         LoadBGCommand=function(self)
+
+            -- TODO: See if there's a video!
             local Path = Song:GetBackgroundPath()
             if Path and FILEMAN:DoesFileExist(Path) then
-                self:LoadFromCached("Background", Path):zoomto(FrameW, FrameH)
+                self:Load( Path ):zoomto(FrameW, FrameH)
                 :linear(PreviewDelay):diffusealpha(1)
             else
                 self:LoadFromCached("Banner", Song:GetBannerPath()):zoomto(FrameW, FrameH)

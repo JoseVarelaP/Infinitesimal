@@ -62,6 +62,7 @@ for i, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
             Def.NoteField {
                 Name = "NotefieldPreview",
                 Player = pnNoteField,
+                AutoPlay = true,
                 --hardcoding skin for now because player choice only updates on screen refresh and most other noteskins look glitchy on previews.
                 NoteSkin = 'delta',
                 DrawDistanceAfterTargetsPixels = NotefieldRenderAfter,
@@ -94,7 +95,7 @@ for i, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
                     if Song then ChartArray = Song:GetAllSteps() else return end
 
                     local Steps = GAMESTATE:GetCurrentSteps(pn)
-                    local StepsType = Steps:GetStepsType()
+                    local StepsType = Steps:GetChartType()
                     --SCREENMAN:SystemMessage(StepsType)
                     self:ModsFromString("C500, Overhead" ) -- this makes it just a simple chart preview instead of a mod preview, but at least it works.
                     --LoadModule("Player.SetSpeed.lua")(pn)
@@ -111,11 +112,8 @@ for i, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
 
                     local NoteData = Song:GetNoteData(ChartIndex)
                     if not NoteData then return end
-
-                    self:SetNoteDataFromLua({})
                     --SCREENMAN:SystemMessage("Loading ChartIndex!")
                     self:SetNoteDataFromLua(NoteData)
-                    self:AutoPlay(true)
                 end
             }
         },

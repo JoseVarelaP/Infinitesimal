@@ -115,8 +115,10 @@ local function InputHandler(event)
 end
 
 -- Manages banner on sprite
+---@param self Sprite
+---@param Song SongObject
 local function UpdateBanner(self, Song)
-    self:LoadFromSongBanner(Song):scaletoclipped(WheelItem.Width, WheelItem.Height)
+    self:LoadFromCachedBanner( Song:GetBannerPath() ):scaletoclipped(WheelItem.Width, WheelItem.Height)
 end
 
 local t = Def.ActorFrame {
@@ -173,23 +175,18 @@ local t = Def.ActorFrame {
     Def.Actor {
         CurrentSongChangedMessageCommand=function(self)
             SOUND:StopMusic()
+            lua.ReportScriptError("Change!")
             self:stoptweening():sleep(0.25):queuecommand("PlayMusic")
         end,
         
         PlayMusicCommand=function(self)
             local Song = GAMESTATE:GetCurrentSong()
-            if Song then
-                if ChartPreview then
-                    local StepList = Song:GetAllSteps()
-                    local FirstStep = StepList[1]
-                    local Duration = FirstStep:GetChartLength()
-                    SOUND:PlayMusicPart(Song:GetMusicPath(), Song:GetSampleStart(), 
-                    (Duration - Song:GetSampleStart()), 0, 1, false, false, false, Song:GetTimingData())
-                else
-                    SOUND:PlayMusicPart(Song:GetMusicPath(), Song:GetSampleStart(), 
-                    Song:GetSampleLength(), 0, 1, false, false, false, Song:GetTimingData())
-                end
-            end
+            if not Song then return end
+            local music = Song:GetMusicPath()
+            local start = Song:GetSampleStart()
+            local length = Song:GetSampleLength()
+
+            SOUND:PlayMusicPart(music, start, length, 1, 1, true)
         end
     },
 
